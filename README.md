@@ -1,6 +1,6 @@
 # scMap-flow
 
-A simple Nextflow pipeline for processing single-cell RNA-seq data using Cell Ranger.
+A simple pipeline for processing single-cell RNA-seq data using Cell Ranger.
 
 ## Requirements
 
@@ -12,15 +12,15 @@ A simple Nextflow pipeline for processing single-cell RNA-seq data using Cell Ra
 
 1. Prepare a samplesheet CSV with the following format:
    ```csv
-   sample_id,fastq_path,sample_name
-   sample1,/path/to/fastq/directory,1
-   sample2,/path/to/fastq/directory,2
+   sample_id,sample_name,fastq_path
+   sample1,1,/path/to/fastq/directory
+   sample2,2,/path/to/fastq/directory
    ```
 
 2. Run the pipeline:
    ```bash
-   nextflow run main.nf \\
-     --samplesheet path/to/samplesheet.csv \\
+   nextflow run johnsonlab-ic/scMap-flow \
+     --samplesheet path/to/samplesheet.csv \
      --outputDir path/to/output \\
      --transcriptome path/to/transcriptome \\
      --cellrangerPath path/to/cellranger \\

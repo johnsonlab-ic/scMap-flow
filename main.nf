@@ -5,28 +5,24 @@ params.samplesheet = "${projectDir}/personal/samplesheet.csv"
 params.outputDir = "output"
 params.transcriptome = null
 params.cellrangerPath = null
-params.localCores = 20
-params.localMem = 200
 
 process mapSamples {
-    label "process_high_memory"
+    label "process_higher_memory"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
-    tuple val(sampleId), val(fastqPath)
+    tuple val(sampleId), val(sampleName), val(fastqPath)
 
     output:
     path "${sampleId}_mapped"
 
     script:
     """
-    echo "Processing sample ${sampleId} from ${fastqPath}"
+    echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
     ${params.cellrangerPath} count --id="${sampleId}_mapped" \\
         --fastqs=${fastqPath} \\
+        --sample=${sampleName} \\
         --transcriptome=${params.transcriptome} \\
-        --localcores=${params.localCores} \\
-        --localmem=${params.localMem} \\
-        --create-bam=true
     """
 }
 
@@ -47,7 +43,7 @@ workflow {
     Channel
         .fromPath(params.samplesheet)
         .splitCsv(header: true)
-        .map { row -> tuple(row.sample_id, row.fastq_path) }
+        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path) }
         .set { sampleChannel }
 
     // Map samples
