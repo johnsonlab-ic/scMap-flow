@@ -20,6 +20,7 @@ process mapSamples {
     """
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
     ${params.cellrangerPath} count --id="${sampleId}_mapped" \\
+        --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
         --transcriptome=${params.transcriptome} \\
