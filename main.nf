@@ -24,7 +24,7 @@ process mapSamples {
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
-        --transcriptome=${params.transcriptome} \\
+        --transcriptome=${params.transcriptome}
     """
 }
 
@@ -32,19 +32,19 @@ process mapSamples_multiome {
     label "process_higher_memory"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
+    
     input:
-    tuple val(sampleId), val(sampleName), val(fastqPath)
+    tuple val(sampleId), path(librariesFile)
 
     output:
     path "${sampleId}_mapped_arc"
 
     script:
     """
-    echo "Processing multiome sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
+    echo "Processing multiome sample ${sampleId} with libraries file"
     ${params.cellranger_arc_path} count --id="${sampleId}_mapped_arc" \\
-        --fastqs=${fastqPath} \\
-        --sample=${sampleName} \\
-        --reference=${params.cellranger_arc_ref_path}
+        --reference=${params.cellranger_arc_ref_path} \\
+        --libraries=${librariesFile}
     """
 }
 
@@ -116,11 +116,30 @@ workflow multiome {
         error "Cell Ranger ARC path not provided. Please specify --cellranger_arc_path"
     }
     
-    // Read sample information from the multiome CSV samplesheet
+    // Read the multiome samplesheet and group entries by sample_id_unique
     Channel
         .fromPath(params.samplesheet_multiome)
         .splitCsv(header: true)
-        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path) }
+        .map { row -> tuple(row.sample_id_unique, row.fastqs, row.sample, row.library_type) }
+        .groupTuple(by: 0)
+        .map { sample_id_unique, fastqsList, sampleNames, libraryTypes -> 
+            // Create a temporary libraries CSV file for each sample
+            def librariesFile = "${workflow.workDir}/libraries_${sample_id_unique}.csv"
+            def librariesContent = "fastqs,sample,library_type\n"
+            
+            // Add each library to the file content
+            for (int i = 0; i < fastqsList.size(); i++) {
+                // Use the actual sample name that Cell Ranger ARC expects
+                librariesContent += "${fastqsList[i]},${sampleNames[i]},${libraryTypes[i]}\n"
+            }
+            
+            // Write the libraries file
+            def librariesPath = file(librariesFile)
+            librariesPath.text = librariesContent
+            
+            // Return sample ID and libraries file path
+            tuple(sample_id_unique, librariesPath)
+        }
         .set { multiomeSampleChannel }
 
     // Process multiome samples
