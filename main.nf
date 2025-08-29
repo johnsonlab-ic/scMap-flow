@@ -9,7 +9,6 @@ params.arc = false  // Parameter to control whether to use the multiome (ARC) pr
 
 process mapSamples {
     label "process_higher_memory"
-    stageInMode = "copy"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
@@ -31,7 +30,6 @@ process mapSamples {
 
 process mapSamples_multiome {
     label "process_higher_memory"
-    stageInMode = "copy"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
