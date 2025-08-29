@@ -29,7 +29,7 @@ process mapSamples {
 }
 
 process mapSamples_multiome {
-    label "process_higher_memory"
+    label "process_arc"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     
