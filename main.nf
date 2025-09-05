@@ -20,7 +20,7 @@ process mapSamples {
     script:
     """
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
-    ${params.cellrangerPath} count --id="${sampleId}_mapped" \\
+    ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \\
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
@@ -42,7 +42,7 @@ process mapSamples_multiome {
     script:
     """
     echo "Processing multiome sample ${sampleId} with libraries file"
-    ${params.cellranger_arc_path} count --id="${sampleId}_mapped_arc" \\
+    ${cellrangerPath}/cellranger-arc count  count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
         --libraries=${librariesFile}
     """
