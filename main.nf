@@ -12,7 +12,7 @@ process mapSamples {
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
-    tuple val(sampleId), val(sampleName), val(fastqPath), path(cellrangerPath)
+    tuple val(sampleId), val(sampleName), val(fastqPath)
 
     output:
     path "${sampleId}_mapped"
@@ -20,7 +20,7 @@ process mapSamples {
     script:
     """
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
-    ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \\
+    ${params.cellrangerPath} count --id="${sampleId}_mapped" \\
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
@@ -29,11 +29,12 @@ process mapSamples {
 }
 
 process mapSamples_multiome {
-    label "process_higher_memory"
+    label "process_arc"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
+    
     input:
-    tuple val(sampleId), path(librariesFile), path(cellrangerArcPath)
+    tuple val(sampleId), path(librariesFile)
 
     output:
     path "${sampleId}_mapped_arc"
@@ -41,7 +42,7 @@ process mapSamples_multiome {
     script:
     """
     echo "Processing multiome sample ${sampleId} with libraries file"
-    ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
+    ${params.cellranger_arc_path} count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
         --libraries=${librariesFile}
     """
@@ -82,7 +83,7 @@ workflow rna {
     Channel
         .fromPath(params.samplesheet)
         .splitCsv(header: true)
-        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path, file(params.cellrangerPath)) }
+        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path) }
         .set { sampleChannel }
 
     // Process RNA samples
@@ -136,8 +137,8 @@ workflow multiome {
             def librariesPath = file(librariesFile)
             librariesPath.text = librariesContent
             
-            // Return sample ID and libraries file path and cellranger arc path
-            tuple(sample_id_unique, librariesPath, file(params.cellranger_arc_path))
+            // Return sample ID and libraries file path
+            tuple(sample_id_unique, librariesPath)
         }
         .set { multiomeSampleChannel }
 
