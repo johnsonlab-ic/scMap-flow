@@ -12,7 +12,7 @@ process mapSamples {
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
-    tuple val(sampleId), val(sampleName), val(fastqPath)
+    tuple val(sampleId), val(sampleName), val(fastqPath), path(cellrangerPath)
 
     output:
     path "${sampleId}_mapped"
@@ -29,12 +29,12 @@ process mapSamples {
 }
 
 process mapSamples_multiome {
-    label "process_arc"
+    label "process_higher_memory"
     tag { sampleId }
     publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     
     input:
-    tuple val(sampleId), path(librariesFile)
+    tuple val(sampleId), path(librariesFile), path(cellrangerArcPath)
 
     output:
     path "${sampleId}_mapped_arc"
@@ -42,7 +42,7 @@ process mapSamples_multiome {
     script:
     """
     echo "Processing multiome sample ${sampleId} with libraries file"
-    ${cellrangerPath}/cellranger-arc count  count --id="${sampleId}_mapped_arc" \\
+    ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
         --libraries=${librariesFile}
     """
@@ -83,7 +83,7 @@ workflow rna {
     Channel
         .fromPath(params.samplesheet)
         .splitCsv(header: true)
-        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path) }
+        .map { row -> tuple(row.sample_id, row.sample_name, row.fastq_path, file(params.cellrangerPath)) }
         .set { sampleChannel }
 
     // Process RNA samples
@@ -138,7 +138,7 @@ workflow multiome {
             librariesPath.text = librariesContent
             
             // Return sample ID and libraries file path
-            tuple(sample_id_unique, librariesPath)
+            tuple(sample_id_unique, librariesPath, file(params.cellranger_arc_path))
         }
         .set { multiomeSampleChannel }
 
