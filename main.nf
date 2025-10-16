@@ -10,28 +10,36 @@ params.arc = false  // Parameter to control whether to use the multiome (ARC) pr
 process mapSamples {
     label "process_higher_memory"
     tag { sampleId }
-    publishDir "${params.outputDir}", mode: 'copy', overwrite: true
+    // publish into per-sample directory
+    publishDir "${params.outputDir}/${sampleId}_mapped", mode: 'copy', overwrite: true
     input:
     tuple val(sampleId), val(sampleName), val(fastqPath), path(cellrangerPath)
 
+    // emit the full sample directory (but we'll remove temp files leaving only outs)
     output:
     path "${sampleId}_mapped"
 
     script:
     """
+    set -euo pipefail
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
     ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \\
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
         --transcriptome=${params.transcriptome}
+
+    # remove everything inside the sample dir except the 'outs' directory
+    if [ -d "${sampleId}_mapped" ]; then
+        find "${sampleId}_mapped" -mindepth 1 -maxdepth 1 ! -name outs -exec rm -rf {} + || true
+    fi
     """
 }
 
 process mapSamples_multiome {
     label "process_higher_memory"
     tag { sampleId }
-    publishDir "${params.outputDir}", mode: 'copy', overwrite: true
+    publishDir "${params.outputDir}/${sampleId}_mapped_arc", mode: 'copy', overwrite: true
     
     input:
     tuple val(sampleId), path(librariesFile), path(cellrangerArcPath)
@@ -41,10 +49,16 @@ process mapSamples_multiome {
 
     script:
     """
+    set -euo pipefail
     echo "Processing multiome sample ${sampleId} with libraries file"
     ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
         --libraries=${librariesFile}
+
+    # remove everything inside the sample dir except the 'outs' directory
+    if [ -d "${sampleId}_mapped_arc" ]; then
+        find "${sampleId}_mapped_arc" -mindepth 1 -maxdepth 1 ! -name outs -exec rm -rf {} + || true
+    fi
     """
 }
 
