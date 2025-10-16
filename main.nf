@@ -11,7 +11,7 @@ process mapSamples {
     label "process_higher_memory"
     tag { sampleId }
     // publish into per-sample directory
-    publishDir "${params.outputDir}/${sampleId}_mapped", mode: 'copy', overwrite: true
+    publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     input:
     tuple val(sampleId), val(sampleName), val(fastqPath), path(cellrangerPath)
 
@@ -39,7 +39,7 @@ process mapSamples {
 process mapSamples_multiome {
     label "process_higher_memory"
     tag { sampleId }
-    publishDir "${params.outputDir}/${sampleId}_mapped_arc", mode: 'copy', overwrite: true
+    publishDir "${params.outputDir}", mode: 'copy', overwrite: true
     
     input:
     tuple val(sampleId), path(librariesFile), path(cellrangerArcPath)
