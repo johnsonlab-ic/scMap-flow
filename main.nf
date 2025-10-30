@@ -27,7 +27,8 @@ process mapSamples {
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
-        --transcriptome=${params.transcriptome}
+        --transcriptome=${params.transcriptome} \\
+        --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
     if [ -d "${sampleId}_mapped" ]; then
@@ -53,7 +54,8 @@ process mapSamples_multiome {
     echo "Processing multiome sample ${sampleId} with libraries file"
     ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
-        --libraries=${librariesFile}
+        --libraries=${librariesFile} \\
+        --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
     if [ -d "${sampleId}_mapped_arc" ]; then
