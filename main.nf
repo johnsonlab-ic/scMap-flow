@@ -23,11 +23,11 @@ process mapSamples {
     """
     set -euo pipefail
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
-    ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \
-        --create-bam true \
-        --fastqs=${fastqPath} \
-        --sample=${sampleName} \
-        --transcriptome=${params.transcriptome} \
+    ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \\
+        --create-bam true \\
+        --fastqs=${fastqPath} \\
+        --sample=${sampleName} \\
+        --transcriptome=${params.transcriptome} \\
         --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
@@ -52,9 +52,9 @@ process mapSamples_multiome {
     """
     set -euo pipefail
     echo "Processing multiome sample ${sampleId} with libraries file"
-    ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \
-        --reference=${params.cellranger_arc_ref_path} \
-        --libraries=${librariesFile} \
+    ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
+        --reference=${params.cellranger_arc_ref_path} \\
+        --libraries=${librariesFile} \\
         --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
