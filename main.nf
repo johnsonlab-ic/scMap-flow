@@ -28,7 +28,7 @@ process mapSamples {
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
         --transcriptome=${params.transcriptome} \\
-        --nosecondary
+        -- --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
     if [ -d "${sampleId}_mapped" ]; then
@@ -55,7 +55,7 @@ process mapSamples_multiome {
     ${cellrangerArcPath}/cellranger-arc count --id="${sampleId}_mapped_arc" \\
         --reference=${params.cellranger_arc_ref_path} \\
         --libraries=${librariesFile} \\
-        --nosecondary
+        -- --nosecondary
 
     # remove everything inside the sample dir except the 'outs' directory
     if [ -d "${sampleId}_mapped_arc" ]; then
