@@ -27,8 +27,7 @@ process mapSamples {
         --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
-        --transcriptome=${params.transcriptome} \\
-        --nosecondary
+        --transcriptome=${params.transcriptome}
 
     # remove everything inside the sample dir except the 'outs' directory
     if [ -d "${sampleId}_mapped" ]; then
