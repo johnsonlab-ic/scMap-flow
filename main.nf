@@ -24,7 +24,6 @@ process mapSamples {
     set -euo pipefail
     echo "Processing sample ${sampleId} from ${fastqPath} with sample name ${sampleName}"
     ${cellrangerPath}/cellranger count --id="${sampleId}_mapped" \\
-        --create-bam true \\
         --fastqs=${fastqPath} \\
         --sample=${sampleName} \\
         --transcriptome=${params.transcriptome}
